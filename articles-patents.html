@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>기사·특허 자료 - AI Tutor Hub</title>
+    <style>
+        /* === 글로벌 최소 글자 크기 보장 === */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Malgun Gothic', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(160deg, #0f2027 0%, #203a43 30%, #2c5364 100%);
+            color: #333;
+            min-font-size: 10pt;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        /* 최소 10pt(약 13.3px) 보장 */
+        body, p, li, span, a, td, th, label, input, textarea, select, button, div {
+            font-size: max(10pt, inherit);
+        }
+
+        /* === 헤더 - 글래스모피즘 프리미엄 === */
+        header {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            box-shadow: 0 1px 30px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        header.scrolled {
+            background: rgba(255, 255, 255, 0.97);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 12px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5em;
+            font-weight: bold;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.03);
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            position: relative;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .logo-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .logo-text {
+            font-family: 'Arial', sans-serif;
+            font-size: 1.3em;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-text .ai {
+            color: #0066CC;
+            text-shadow: 0 1px 2px rgba(0, 102, 204, 0.15);
+        }
+
+        .logo-text .tutor {
+            color: #1a1a2e;
+        }
+
+        .logo-text .hub {
+            color: #FF3366;
+            text-shadow: 0 1px 2px rgba(255, 51, 102, 0.15);
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 6px;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-item {
+            position: relative;
+            cursor: pointer;
+            padding: 8px 14px;
+            color: #444;
+            font-weight: 600;
+            font-size: 10pt;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 8px;
+            white-space: nowrap;
+        }
+
+        .nav-item:hover {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .nav-item::after {
+            content: '';
+            display: none;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        .nav-item:hover::before {
+            width: 60%;
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 28px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 10pt;
+            letter-spacing: 0.3px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.45);
+        }
+
+        .login-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        /* === 메인 컨테이너 === */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 50px 30px;
+        }
+
+        /* === 포트폴리오 섹션 - 프리미엄 === */
+        .portfolio-section {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 24px;
+            padding: 60px 50px;
+            box-shadow: 0 10px 60px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.03);
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .portfolio-section h1 {
+            font-size: 2.8em;
+            margin-bottom: 30px;
+            color: #1a1a2e;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .portfolio-section p {
+            font-size: 1.2em;
+            color: #555;
+            line-height: 1.9;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* === 특징 카드 - 프리미엄 === */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+
+        .feature-card {
+            background: linear-gradient(160deg, #fafbff 0%, #ffffff 100%);
+            border-radius: 20px;
+            padding: 40px 35px;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(102, 126, 234, 0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-12px);
+            border-color: rgba(102, 126, 234, 0.2);
+            box-shadow: 0 20px 50px rgba(102, 126, 234, 0.15), 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .feature-icon {
+            font-size: 3.2em;
+            margin-bottom: 22px;
+            filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.1));
+        }
+
+        .feature-card h3 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: #1a1a2e;
+            font-weight: 700;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.7;
+            font-size: 10pt;
+        }
+
+        /* === CTA 섹션 - 프리미엄 === */
+        .cta-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 60%, #f093fb 100%);
+            border-radius: 24px;
+            padding: 70px 50px;
+            text-align: center;
+            margin-top: 60px;
+            color: white;
+            box-shadow: 0 15px 50px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 60%);
+            animation: shimmer 8s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(20%, 20%); }
+        }
+
+        .cta-section h2 {
+            font-size: 2.4em;
+            margin-bottom: 20px;
+            font-weight: 800;
+            position: relative;
+        }
+
+        .cta-section p {
+            font-size: 1.2em;
+            margin-bottom: 35px;
+            opacity: 0.95;
+            position: relative;
+        }
+
+        .cta-button {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 16px 55px;
+            border-radius: 35px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 12px 35px rgba(255, 255, 255, 0.35);
+        }
+
+        /* === 푸터 - 프리미엄 === */
+        footer {
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            padding: 60px 0 40px;
+            margin-top: 80px;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 50px;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 22px;
+            font-size: 1.3em;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 12px;
+            opacity: 0.7;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 10pt;
+            padding-left: 0;
+        }
+
+        .footer-section ul li:hover {
+            opacity: 1;
+            padding-left: 6px;
+            color: #667eea;
+        }
+
+        .copyright {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            opacity: 0.6;
+            font-size: 10pt;
+        }
+
+        /* === 반응형 === */
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: rgba(255, 255, 255, 0.98);
+                backdrop-filter: blur(20px);
+                flex-direction: column;
+                padding: 20px;
+                gap: 4px;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+                border-radius: 0 0 20px 20px;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .portfolio-section {
+                padding: 40px 20px;
+            }
+
+            .portfolio-section h1 {
+                font-size: 2em;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            nav {
+                padding: 12px 20px;
+            }
+        }
+
+        /* === 모바일 메뉴 버튼 === */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            font-size: 1.3em;
+            cursor: pointer;
+            color: #333;
+            padding: 6px 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-menu-btn:hover {
+            background: rgba(102, 126, 234, 0.08);
+            border-color: rgba(102, 126, 234, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+        }
+
+        /* === 섹션 공통 프리미엄 스타일 === */
+        [id] > h2 {
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        /* === 스크롤바 커스텀 === */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #667eea, #764ba2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #5a6fd6, #6b4299);
+        }
+
+        /* === 선택 텍스트 컬러 === */
+        ::selection {
+            background: rgba(102, 126, 234, 0.2);
+            color: #1a1a2e;
+        }
+
+        /* === 부드러운 애니메이션 === */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .portfolio-section > div[id] {
+            animation: fadeInUp 0.6s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <a href="index.html" style="display:flex;align-items:center;gap:12px;text-decoration:none;">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="rainbowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#FF6B6B;stop-opacity:1" />
+                                <stop offset="20%" style="stop-color:#FFA500;stop-opacity:1" />
+                                <stop offset="40%" style="stop-color:#FFD700;stop-opacity:1" />
+                                <stop offset="60%" style="stop-color:#4CAF50;stop-opacity:1" />
+                                <stop offset="80%" style="stop-color:#2196F3;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#9C27B0;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M8 20 L24 12 L40 20 L24 28 Z" fill="url(#rainbowGrad)"/>
+                        <path d="M12 22 L12 30 L24 36 L36 30 L36 22" fill="url(#rainbowGrad)" opacity="0.8"/>
+                        <line x1="40" y1="20" x2="40" y2="32" stroke="url(#rainbowGrad)" stroke-width="1.5"/>
+                        <circle cx="40" cy="33" r="2" fill="url(#rainbowGrad)"/>
+                    </svg>
+                </div>
+                <span class="logo-text">
+                    <span class="ai">AI</span><span class="tutor">Tutor</span><span class="hub">Hub</span>
+                </span>
+                </a>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="ai-book-tutor.html" style="text-decoration:none;color:inherit;">AI북튜터</a></li>
+                <li class="nav-item"><a href="ai-edu-tutor.html" style="text-decoration:none;color:inherit;">AI교육튜터</a></li>
+                <li class="nav-item"><a href="ai-biz-tutor.html" style="text-decoration:none;color:inherit;">AI비즈튜터</a></li>
+                <li class="nav-item"><a href="ai-sales-tutor.html" style="text-decoration:none;color:inherit;">AI세일즈튜터</a></li>
+                <li class="nav-item"><a href="ai-gallery.html" style="text-decoration:none;color:inherit;">AI갤러리</a></li>
+                <li class="nav-item"><a href="ai-election-tutor.html" style="text-decoration:none;color:inherit;">AI선거튜터</a></li>
+                <li class="nav-item"><a href="ai-faith-tutor.html" style="text-decoration:none;color:inherit;">AI신앙튜터</a></li>
+                <li class="nav-item"><a href="articles-patents.html" style="text-decoration:none;color:inherit;">기사·특허 자료</a></li>
+                <li class="nav-item"><a href="notice.html" style="text-decoration:none;color:inherit;">공지사항</a></li>
+            </ul>
+            <button class="mobile-menu-btn">☰</button>
+            <button class="login-btn">로그인</button>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="portfolio-section">
+        <div id="기사특허자료" style="margin-bottom: 60px; background: rgba(255,255,255,0.98); padding: 50px 45px; border-radius: 24px; box-shadow: 0 10px 50px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.03); border: 1px solid rgba(255,255,255,0.5);">
+            <h2 style="font-size: 2.5em; margin-bottom: 20px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">📰 기사·특허 자료</h2>
+            
+            <!-- 메인 소개 -->
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 50px 40px; border-radius: 20px; margin-bottom: 40px; text-align: center;">
+                <h3 style="font-size: 2em; margin-bottom: 20px; color: #ffffff; font-weight: bold;">독서와 학습 혁신의 새 시대</h3>
+                <p style="font-size: 1.5em; color: #ffffff; line-height: 1.8;">
+                    실시간 양방향 대화형 AIBookTutor© 출시
+                </p>
+            </div>
+
+            <!-- 언론 보도 -->
+            <div style="margin-bottom: 50px;">
+                <h3 style="font-size: 2em; margin-bottom: 30px; text-align: center; color: #333;">📢 언론 보도</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px; margin-bottom: 40px;">
+                    <!-- 사례뉴스 기사 1 -->
+                    <div style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); padding: 30px; border-radius: 15px; box-shadow: 0 8px 30px rgba(0,0,0,0.08);">
+                        <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                            <div style="width: 60px; height: 60px; background: #1976d2; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                                <span style="font-size: 2em;">📰</span>
+                            </div>
+                            <div>
+                                <h4 style="font-size: 1.3em; color: #1565c0; font-weight: bold;">사례뉴스</h4>
+                                <p style="font-size: 1em; color: #666;">casenews.co.kr</p>
+                            </div>
+                        </div>
+                        <h5 style="font-size: 1.2em; margin-bottom: 15px; color: #333; line-height: 1.6;">
+                            대한민국 독서율 하락 문제를 해결하는 AI독서·학습 솔루션
+                        </h5>
+                        <p style="font-size: 1em; color: #666; line-height: 1.8; margin-bottom: 15px;">
+                            AI를 통해 맞춤형 학습과 심화 독서를 개인 수준별 맞춤식 지원
+                        </p>
+                        <a href="http://www.casenews.co.kr" target="_blank" style="display: inline-block; background: #1976d2; color: white; padding: 10px 25px; border-radius: 20px; text-decoration: none; font-weight: bold; transition: background 0.3s;">
+                            기사 보기 →
+                        </a>
+                    </div>
+
+                    <!-- 사례뉴스 기사 2 -->
+                    <div style="background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%); padding: 30px; border-radius: 15px; box-shadow: 0 8px 30px rgba(0,0,0,0.08);">
+                        <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                            <div style="width: 60px; height: 60px; background: #7b1fa2; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                                <span style="font-size: 2em;">📰</span>
+                            </div>
+                            <div>
+                                <h4 style="font-size: 1.3em; color: #6a1b9a; font-weight: bold;">사례뉴스</h4>
+                                <p style="font-size: 1em; color: #666;">casenews.co.kr</p>
+                            </div>
+                        </div>
+                        <h5 style="font-size: 1.2em; margin-bottom: 15px; color: #333; line-height: 1.6;">
+                            국내외 독서와 교육 현장에서 기대되는 독서와 학습 혁신
+                        </h5>
+                        <p style="font-size: 1em; color: #666; line-height: 1.8; margin-bottom: 15px;">
+                            독서와 학습 혁신의 새 시대, 실시간 양방향 대화형 AIBookTutor© 출시
+                        </p>
+                        <a href="http://www.casenews.co.kr" target="_blank" style="display: inline-block; background: #7b1fa2; color: white; padding: 10px 25px; border-radius: 20px; text-decoration: none; font-weight: bold; transition: background 0.3s;">
+                            기사 보기 →
+                        </a>
+                    </div>
+
+                    <!-- 브런치 기사 -->
+                    <div style="background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); padding: 30px; border-radius: 15px; box-shadow: 0 8px 30px rgba(0,0,0,0.08);">
+                        <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                            <div style="width: 60px; height: 60px; background: #f57c00; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                                <span style="font-size: 2em;">✍️</span>
+                            </div>
+                            <div>
+                                <h4 style="font-size: 1.3em; color: #e65100; font-weight: bold;">브런치</h4>
+                                <p style="font-size: 1em; color: #666;">brunch.co.kr</p>
+                            </div>
+                        </div>
+                        <h5 style="font-size: 1.2em; margin-bottom: 15px; color: #333; line-height: 1.6;">
+                            AIBookTutor© - 독서와 학습의 패러다임 전환
+                        </h5>
+                        <p style="font-size: 1em; color: #666; line-height: 1.8; margin-bottom: 15px;">
+                            실시간 양방향 대화형 AI 학습 솔루션으로 개인 맞춤형 독서 경험 제공
+                        </p>
+                        <a href="https://brunch.co.kr/@brunchjwshim/556" target="_blank" style="display: inline-block; background: #f57c00; color: white; padding: 10px 25px; border-radius: 20px; text-decoration: none; font-weight: bold; transition: background 0.3s;">
+                            기사 보기 →
+                        </a>
+                    </div>
+
+                    <!-- 추가 사례뉴스 -->
+                    <div style="background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); padding: 30px; border-radius: 15px; box-shadow: 0 8px 30px rgba(0,0,0,0.08);">
+                        <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                            <div style="width: 60px; height: 60px; background: #388e3c; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                                <span style="font-size: 2em;">📰</span>
+                            </div>
+                            <div>
+                                <h4 style="font-size: 1.3em; color: #2e7d32; font-weight: bold;">사례뉴스</h4>
+                                <p style="font-size: 1em; color: #666;">casenews.co.kr</p>
+                            </div>
+                        </div>
+                        <h5 style="font-size: 1.2em; margin-bottom: 15px; color: #333; line-height: 1.6;">
+                            AI를 통한 맞춤형 학습과 심화 독서 지원
+                        </h5>
+                        <p style="font-size: 1em; color: #666; line-height: 1.8; margin-bottom: 15px;">
+                            개인 수준별 맞춤식 독서·학습 솔루션으로 교육 혁신 주도
+                        </p>
+                        <a href="http://www.casenews.co.kr" target="_blank" style="display: inline-block; background: #388e3c; color: white; padding: 10px 25px; border-radius: 20px; text-decoration: none; font-weight: bold; transition: background 0.3s;">
+                            기사 보기 →
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 핵심 내용 -->
+            <div style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); padding: 40px; border-radius: 20px; margin-bottom: 40px;">
+                <h3 style="font-size: 2em; margin-bottom: 30px; text-align: center; color: #333;">🎯 핵심 혁신 내용</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px;">
+                    <div style="background: white; padding: 30px; border-radius: 10px; text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
+                        <div style="font-size: 3em; margin-bottom: 15px;">📉</div>
+                        <h4 style="font-size: 1.3em; margin-bottom: 15px; color: #333;">독서율 하락 해결</h4>
+                        <p style="font-size: 1em; color: #666; line-height: 1.6;">
+                            대한민국 독서율 하락 문제를 AI 기술로 해결
+                        </p>
+                    </div>
+                    
+                    <div style="background: white; padding: 30px; border-radius: 10px; text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
+                        <div style="font-size: 3em; margin-bottom: 15px;">🎓</div>
+                        <h4 style="font-size: 1.3em; margin-bottom: 15px; color: #333;">맞춤형 학습</h4>
+                        <p style="font-size: 1em; color: #666; line-height: 1.6;">
+                            개인 수준별 맞춤식 독서와 심화 학습 지원
+                        </p>
+                    </div>
+                    
+                    <div style="background: white; padding: 30px; border-radius: 10px; text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
+                        <div style="font-size: 3em; margin-bottom: 15px;">🌏</div>
+                        <h4 style="font-size: 1.3em; margin-bottom: 15px; color: #333;">교육 혁신</h4>
+                        <p style="font-size: 1em; color: #666; line-height: 1.6;">
+                            국내외 독서와 교육 현장의 혁신 주도
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 특허 정보 -->
+            <div style="background: #f8f9fa; padding: 40px; border-radius: 20px; margin-bottom: 40px;">
+                <h3 style="font-size: 2em; margin-bottom: 30px; text-align: center; color: #333;">🏆 특허 및 저작권</h3>
+                
+                <div style="background: white; padding: 30px; border-radius: 10px; border-left: 5px solid #667eea;">
+                    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                        <div style="font-size: 3em; margin-right: 20px;">📜</div>
+                        <div>
+                            <h4 style="font-size: 1.5em; color: #333; margin-bottom: 10px;">AIBookTutor© 특허 등록</h4>
+                            <p style="font-size: 1.1em; color: #666; line-height: 1.6;">
+                                실시간 양방향 대화형 AI 독서·학습 시스템의 독창적 기술력을 인정받아<br>
+                                특허 및 저작권을 보유하고 있습니다.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #e8f5e9; padding: 20px; border-radius: 8px; margin-top: 20px;">
+                        <p style="font-size: 1em; color: #2e7d32; line-height: 1.8;">
+                            ✓ 특허 등록된 AI 학습 알고리즘<br>
+                            ✓ 저작권 보호된 콘텐츠 시스템<br>
+                            ✓ 독창적인 양방향 대화 기술
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 연락처 -->
+            <div style="text-align: center; padding: 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px;">
+                <h4 style="font-size: 1.5em; margin-bottom: 15px; color: #ffffff;">언론 및 제휴 문의</h4>
+                <p style="font-size: 1.2em; margin-bottom: 10px; color: #ffffff;">심재우 대표</p>
+                <p style="font-size: 1.1em; color: #ffffff;">📞 010-2397-5734</p>
+                <p style="font-size: 1.1em; color: #ffffff;">📧 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="3c565d554b4f5455517c5b515d5550125f5351">[email&#160;protected]</a></p>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>AI Tutor Hub</h3>
+                <ul>
+                    <li>회사소개</li>
+                    <li>팀 소개</li>
+                    <li>채용</li>
+                    <li>블로그</li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>제품</h3>
+                <ul>
+                    <li>Ai북튜터</li>
+                    <li>Ai교육튜터</li>
+                    <li>Ai비즈튜터</li>
+                    <li>Ai선거튜터</li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>지원</h3>
+                <ul>
+                    <li>고객센터</li>
+                    <li>FAQ</li>
+                    <li>이용가이드</li>
+                    <li>문의하기</li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>법적 고지</h3>
+                <ul>
+                    <li>이용약관</li>
+                    <li>개인정보처리방침</li>
+                    <li>저작권 정책</li>
+                    <li>환불 정책</li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>© 2025 AI Tutor Hub. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // 헤더 스크롤 효과
+        window.addEventListener("scroll", function() {
+            var header = document.querySelector("header");
+            if (window.scrollY > 50) {
+                header.classList.add("scrolled");
+            } else {
+                header.classList.remove("scrolled");
+            }
+        });
+
+        // 모바일 메뉴 토글
+        document.querySelector(".mobile-menu-btn").addEventListener("click", function() {
+            var menu = document.querySelector(".nav-menu");
+            if (menu.style.display === "flex") {
+                menu.style.display = "none";
+                menu.classList.remove("active");
+            } else {
+                menu.style.display = "flex";
+                menu.classList.add("active");
+            }
+        });
+    </script>
+</body>
+</html>
